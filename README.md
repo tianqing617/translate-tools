@@ -4,3 +4,6 @@
 2. 输入以下命令
 /translate https://cloud.google.com/blog/topics/developers-practitioners/gemini-cli-custom-slash-commands
 ```
+
+### translate命令
+文件路径：.gemini/commands/translate.toml
