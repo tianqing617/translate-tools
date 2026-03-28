@@ -1,0 +1,434 @@
+   #[1]home [2]Developers & Practitioners
+
+   [3]Jump to Content
+
+   [4]
+   Cloud
+   (BUTTON)
+   [5]Blog
+   [6]Contact sales [7]Get started for free
+   ____________________
+
+   [8]
+   Cloud
+   [9]Blog
+
+     * Solutions & technology
+          + [10]AI & Machine Learning
+          + [11]API Management
+          + [12]Application Development
+          + [13]Application Modernization
+          + [14]Chrome Enterprise
+          + [15]Compute
+          + [16]Containers & Kubernetes
+          + [17]Data Analytics
+          + [18]Databases
+          + [19]DevOps & SRE
+          + [20]Maps & Geospatial
+          + Security
+               o [21]Security & Identity
+               o [22]Threat Intelligence
+          + [23]Infrastructure
+          + [24]Infrastructure Modernization
+          + [25]Networking
+          + [26]Productivity & Collaboration
+          + [27]SAP on Google Cloud
+          + [28]Storage & Data Transfer
+          + [29]Sustainability
+     * Ecosystem
+          + [30]IT Leaders
+          + Industries
+               o [31]Financial Services
+               o [32]Healthcare & Life Sciences
+               o [33]Manufacturing
+               o [34]Media & Entertainment
+               o [35]Public Sector
+               o [36]Retail
+               o [37]Supply Chain
+               o [38]Telecommunications
+          + [39]Partners
+          + [40]Startups & SMB
+          + [41]Training & Certifications
+          + [42]Inside Google Cloud
+          + [43]Google Cloud Next & Events
+          + [44]Google Cloud Consulting
+          + [45]Google Maps Platform
+          + [46]Google Workspace
+     * [47]Developers & Practitioners
+     * [48]Transform with Google Cloud
+
+   [49]Contact sales [50]Get started for free
+   ____________________
+
+   Developers & Practitioners
+
+   Gemini CLI: Custom slash commands
+   July 31, 2025
+     *
+     *
+     *
+     *
+
+   [51]https://storage.googleapis.com/gweb-cloudblog-publish/images/custom
+   _slash_commands_header.max-2600x2600.png
+
+Jack Wotherspoon
+
+   Developer Advocate
+
+Abhi Patel
+
+   Software Engineer
+
+   Today, we're announcing support for custom slash commands in [52]Gemini
+   CLI! This highly requested feature lets you define reusable prompts for
+   streamlining interactions with Gemini CLI and helps improve efficiency
+   across workflows. Slash commands can be defined in local .toml files or
+   through Model Context Protocol (MCP) prompts. Get ready to transform
+   how you leverage Gemini CLI with the new power of slash commands!
+
+   [53]https://storage.googleapis.com/gweb-cloudblog-publish/original_imag
+   es/custom_slash_commands_review.gif
+
+   [54]https://storage.googleapis.com/gweb-cloudblog-publish/original_imag
+   es/custom_slash_commands_review.gif (BUTTON)
+
+   To use slash commands, make sure that you update to the latest version
+   of Gemini CLI.
+
+   Update npx:
+
+   Loading...
+
+   npx @google/gemini-cli______________________________________
+   ____________________________________________________________
+   ____________________________________________________________
+   ____________________________________________________________
+
+   Update npm:
+
+   Loading...
+
+   npm install -g @google/gemini-cli@latest____________________
+   ____________________________________________________________
+   ____________________________________________________________
+   ____________________________________________________________
+
+Powerful and extensible foundation with .toml files
+
+   The foundation of custom slash commands is rooted in .toml files.
+
+   The .toml file provides a powerful and structured base on which to
+   build extensive support for complex commands. To help support a wide
+   range of users, we made the required keys minimal (just prompt). And we
+   support easy-to-use args with {{args}} and shell command execution
+   !{...} directly into the prompt.
+
+   Here is an example .toml file that is invoked using /review
+   <issue_number> from Gemini CLI to review a GitHub PR. Notice that the
+   file name defines the command name and it's case sensitive. For more
+   information about custom slash commands, see the [55]Custom Commands
+   section of the Gemini CLI documentation.
+
+   Loading...
+
+   description="Reviews a pull request based on issue number."_
+   prompt = """________________________________________________
+   Please provide a detailed pull request review on GitHub issu
+   ____________________________________________________________
+   Follow these steps:_________________________________________
+   ____________________________________________________________
+   1. Use `gh pr view {{args}}` to pull the information of the 
+   2. Use `gh pr diff {{args}}` to view the diff of the PR.____
+   3. Understand the intent of the PR using the PR description.
+   4. If PR description is not detailed enough to understand th
+      make sure to note it in your review._____________________
+   5. Make sure the PR title follows Conventional Commits, here
+      commits to the repo as examples: !{git log --pretty=forma
+   6. Search the codebase if required._________________________
+   7. Write a concise review of the PR, keeping in mind to enco
+      quality and best practices.______________________________
+   8. Use `gh pr comment {{args}} --body {{review}}` to post th
+   ____________________________________________________________
+   Remember to use the GitHub CLI (`gh`) with the Shell tool fo
+   GitHub-related tasks._______________________________________
+   """_________________________________________________________
+
+Namespacing
+
+   The name of a command is determined by its file path relative to the
+   commands directory. Sub-directories are used to create namespaced
+   commands, with the path separator (/ or \) being converted to a colon
+   (:).
+     * A file at <project>/.gemini/commands/test.toml becomes the command
+       /test.
+     * A file at <project>/.gemini/commands/git/commit.toml becomes the
+       namespaced command /git:commit.
+
+   [56]https://storage.googleapis.com/gweb-cloudblog-publish/original_imag
+   es/custom_slash_commands_namespaces.gif
+
+   [57]https://storage.googleapis.com/gweb-cloudblog-publish/original_imag
+   es/custom_slash_commands_namespaces.gif (BUTTON)
+
+   This allows grouping related commands under a single namespace.
+
+Building a slash command
+
+   The next few sections show you how to build a slash command for Gemini
+   CLI.
+
+1 - Create the command file
+
+   First, create a file named plan.toml inside the ~/.gemini/commands/
+   directory. Doing so will let you create a /plan command to tell Gemini
+   CLI to only plan the changes by providing a step-by-step plan and to
+   not start on implementation. This approach will let you provide
+   feedback and iterate on the plan before implementation.
+
+   Custom slash commands can be scoped to an individual user or project by
+   defining the .toml files in designated directories.
+     * User-scoped commands are available across all Gemini CLI projects
+       for a user and are stored in ~/.gemini/commands/ (note the ~).
+     * Project-scoped commands are only available from sessions within a
+       given project and are stored in .gemini/commands/.
+
+   Hint: To streamline project workflows, check these into Git
+   repositories!
+
+   Loading...
+
+   mkdir -p ~/.gemini/commands_________________________________
+   touch ~/.gemini/commands/plan.toml__________________________
+   ____________________________________________________________
+   ____________________________________________________________
+
+2 - Add the command definition
+
+   Open plan.toml and add the following content:
+
+   Loading...
+
+   # ~/.gemini/commands/plan.toml______________________________
+   ____________________________________________________________
+   description="Investigates and creates a strategic plan to ac
+   prompt = """________________________________________________
+   Your primary role is that of a strategist, not an implemente
+   Your task is to stop, think deeply, and devise a comprehensi
+   ____________________________________________________________
+   You MUST NOT write, modify, or execute any code. Your sole f
+   ____________________________________________________________
+   Use your available "read" and "search" tools to research and
+   ____________________________________________________________
+   Present your strategic plan in markdown. It should be the di
+   ____________________________________________________________
+   1.  **Understanding the Goal:** Re-state the objective to co
+   2.  **Investigation & Analysis:** Describe the investigative
+   3.  **Proposed Strategic Approach:** Outline the high-level 
+   4.  **Verification Strategy:** Explain how the success of th
+   5.  **Anticipated Challenges & Considerations:** Based on yo
+   ____________________________________________________________
+   Your final output should be ONLY this strategic plan._______
+   """_________________________________________________________
+
+3 - Use the command
+
+   Now you can use this command within Gemini CLI:
+
+   Loading...
+
+   /plan How can I make the project more performant?___________
+   ____________________________________________________________
+   ____________________________________________________________
+   ____________________________________________________________
+
+   Gemini will plan out the changes and output a detailed step-by-step
+   execution plan!
+
+Enriched integration with MCP Prompts
+
+   Gemini CLI now offers a more integrated experience with MCP by
+   supporting [58]MCP Prompts as slash commands! MCP provides a
+   standardized way for servers to expose prompt templates to clients.
+   Gemini CLI utilizes this to expose available prompts for configured MCP
+   servers and make the prompts available as slash commands.
+
+   The name and description of the MCP prompt is used as the slash command
+   name and description. MCP prompt arguments are also supported and
+   leveraged in slash commands by using /mycommand
+   --<argument_name>="<argument_value>" or positionally /mycommand
+   <argument1> <argument2>.
+
+   The following is an example /research command that uses [59]FastMCP
+   Python server:
+
+   [60]https://storage.googleapis.com/gweb-cloudblog-publish/original_imag
+   es/custom_slash_commands_mcp.gif
+
+   [61]https://storage.googleapis.com/gweb-cloudblog-publish/original_imag
+   es/custom_slash_commands_mcp.gif (BUTTON)
+
+Easy to get started
+
+   So what are you waiting for? Upgrade your terminal experience with
+   [62]Gemini CLI today and try out custom slash commands to streamline
+   your workflows. To learn more, check out the [63]Custom Commands
+   documentation for the Gemini CLI.
+
+   Posted in
+     * [64]Developers & Practitioners
+
+Related articles
+
+   [65]
+
+   https://storage.googleapis.com/gweb-cloudblog-publish/images/hero-image
+   .max-700x700.jpg-[66][hero-image.max-700x700.jpg]
+   Developers & Practitioners
+
+Five techniques to reach the efficient frontier of LLM inference
+
+   By Karl Weinmeister o 9-minute read
+   [67]
+
+   https://storage.googleapis.com/gweb-cloudblog-publish/images/11_-_Devel
+   opers__Practitioners_a4Y5EGr.max-700x700.jpg-[68][11_-_Developers__Prac
+   titioners_a4Y5EGr.max-700x700.jpg]
+   Developers & Practitioners
+
+The new AI literacy: Insights from student developers
+
+   By Andrew Harlan, Ph.D. o 8-minute read
+   [69]
+
+   https://storage.googleapis.com/gweb-cloudblog-publish/images/building-d
+   istributed-ai-agents-hero.max-700x700.jpg-[70][building-distributed-ai-
+   agents-hero.max-700x700.jpg]
+   Developers & Practitioners
+
+Building Distributed AI Agents
+
+   By Amit Maraj o 5-minute read
+   [71]
+
+   https://storage.googleapis.com/gweb-cloudblog-publish/images/devsignalh
+   eroimage.max-700x700.png-[72][devsignalheroimage.max-700x700.png]
+   Developers & Practitioners
+
+Build a Multi-Agent System for Expert Content with Google ADK, MCP and Cloud
+Run - Part 1
+
+   By Shir Meir Lador o 14-minute read
+
+  Footer Links
+
+Follow us
+
+     *
+     *
+     *
+     *
+     *
+
+     * [73]Google Cloud
+     * [74]Google Cloud Products
+     * [75]Privacy
+     * [76]Terms
+     * [77]Cookies management controls
+
+     * [78]Help
+     * [ªEnglish_]
+
+References
+
+   Visible links:
+   1. https://cloud.google.com/?lfhs=2
+   2. https://cloudblog.withgoogle.com/topics/developers-practitioners/rss
+   3. https://cloud.google.com/blog/#content
+   4. https://cloud.google.com/
+   5. https://cloud.google.com/blog/
+   6. https://cloud.google.com/contact/
+   7. https://console.cloud.google.com/freetrial/
+   8. https://cloud.google.com/
+   9. https://cloud.google.com/blog/
+  10. https://cloud.google.com/blog/products/ai-machine-learning
+  11. https://cloud.google.com/blog/products/api-management
+  12. https://cloud.google.com/blog/products/application-development
+  13. https://cloud.google.com/blog/products/application-modernization
+  14. https://cloud.google.com/blog/products/chrome-enterprise
+  15. https://cloud.google.com/blog/products/compute
+  16. https://cloud.google.com/blog/products/containers-kubernetes
+  17. https://cloud.google.com/blog/products/data-analytics
+  18. https://cloud.google.com/blog/products/databases
+  19. https://cloud.google.com/blog/products/devops-sre
+  20. https://cloud.google.com/blog/topics/maps-geospatial
+  21. https://cloud.google.com/blog/products/identity-security
+  22. https://cloud.google.com/blog/topics/threat-intelligence
+  23. https://cloud.google.com/blog/products/infrastructure
+  24. https://cloud.google.com/blog/products/infrastructure-modernization
+  25. https://cloud.google.com/blog/products/networking
+  26. https://cloud.google.com/blog/products/productivity-collaboration
+  27. https://cloud.google.com/blog/products/sap-google-cloud
+  28. https://cloud.google.com/blog/products/storage-data-transfer
+  29. https://cloud.google.com/blog/topics/sustainability
+  30. https://cloud.google.com/transform
+  31. https://cloud.google.com/blog/topics/financial-services
+  32. https://cloud.google.com/blog/topics/healthcare-life-sciences
+  33. https://cloud.google.com/blog/topics/manufacturing
+  34. https://cloud.google.com/blog/products/media-entertainment
+  35. https://cloud.google.com/blog/topics/public-sector
+  36. https://cloud.google.com/blog/topics/retail
+  37. https://cloud.google.com/blog/topics/supply-chain-logistics
+  38. https://cloud.google.com/blog/topics/telecommunications
+  39. https://cloud.google.com/blog/topics/partners
+  40. https://cloud.google.com/blog/topics/startups
+  41. https://cloud.google.com/blog/topics/training-certifications
+  42. https://cloud.google.com/blog/topics/inside-google-cloud
+  43. https://cloud.google.com/blog/topics/google-cloud-next
+  44. https://cloud.google.com/blog/topics/consulting
+  45. https://mapsplatform.google.com/resources/blog/
+  46. https://workspace.google.com/blog
+  47. https://cloud.google.com/blog/topics/developers-practitioners
+  48. https://cloud.google.com/transform
+  49. https://cloud.google.com/contact/
+  50. https://console.cloud.google.com/freetrial/
+  51. https://storage.googleapis.com/gweb-cloudblog-publish/images/custom_slash_commands_header.max-2600x2600.png
+  52. https://github.com/google-gemini/gemini-cli
+  53. https://storage.googleapis.com/gweb-cloudblog-publish/original_images/custom_slash_commands_review.gif
+  54. https://storage.googleapis.com/gweb-cloudblog-publish/original_images/custom_slash_commands_review.gif
+  55. https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/commands.md#custom-commands
+  56. https://storage.googleapis.com/gweb-cloudblog-publish/original_images/custom_slash_commands_namespaces.gif
+  57. https://storage.googleapis.com/gweb-cloudblog-publish/original_images/custom_slash_commands_namespaces.gif
+  58. https://modelcontextprotocol.io/specification/2025-06-18/server/prompts
+  59. https://gofastmcp.com/getting-started/welcome
+  60. https://storage.googleapis.com/gweb-cloudblog-publish/original_images/custom_slash_commands_mcp.gif
+  61. https://storage.googleapis.com/gweb-cloudblog-publish/original_images/custom_slash_commands_mcp.gif
+  62. https://github.com/google-gemini/gemini-cli
+  63. https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/commands.md#custom-commands
+  64. https://cloud.google.com/blog/topics/developers-practitioners
+  65. https://cloud.google.com/blog/topics/developers-practitioners/five-techniques-to-reach-the-efficient-frontier-of-llm-inference
+  66. https://storage.googleapis.com/gweb-cloudblog-publish/images/hero-image.max-700x700.jpg
+  67. https://cloud.google.com/blog/topics/developers-practitioners/how-uc-berkeley-students-use-ai-as-a-learning-partner
+  68. https://storage.googleapis.com/gweb-cloudblog-publish/images/11_-_Developers__Practitioners_a4Y5EGr.max-700x700.jpg
+  69. https://cloud.google.com/blog/topics/developers-practitioners/building-distributed-ai-agents
+  70. https://storage.googleapis.com/gweb-cloudblog-publish/images/building-distributed-ai-agents-hero.max-700x700.jpg
+  71. https://cloud.google.com/blog/topics/developers-practitioners/build-a-multi-agent-system-for-expert-content-with-google-adk-mcp-and-cloud-run-part-1
+  72. https://storage.googleapis.com/gweb-cloudblog-publish/images/devsignalheroimage.max-700x700.png
+  73. https://cloud.google.com/
+  74. https://cloud.google.com/products/
+  75. https://myaccount.google.com/privacypolicy?hl=en-US
+  76. https://myaccount.google.com/termsofservice?hl=en-US
+  77. https://cloud.google.com/blog/topics/developers-practitioners/gemini-cli-custom-slash-commands
+  78. https://support.google.com/
+
+   Hidden links:
+  80. https://x.com/intent/tweet?text=Gemini%20CLI:%20Custom%20slash%20commands%20@googlecloud&url=https://cloud.google.com/blog/topics/developers-practitioners/gemini-cli-custom-slash-commands
+  81. https://www.linkedin.com/shareArticle?mini=true&url=https://cloud.google.com/blog/topics/developers-practitioners/gemini-cli-custom-slash-commands&title=Gemini%20CLI:%20Custom%20slash%20commands
+  82. https://www.facebook.com/sharer/sharer.php?caption=Gemini%20CLI:%20Custom%20slash%20commands&u=https://cloud.google.com/blog/topics/developers-practitioners/gemini-cli-custom-slash-commands
+  83. mailto:?subject=Gemini%20CLI:%20Custom%20slash%20commands&body=Check%20out%20this%20article%20on%20the%20Cloud%20Blog:%0A%0AGemini%20CLI:%20Custom%20slash%20commands%0A%0ALearn%20about%20custom%20slash%20commands%20in%20Gemini%20CLI,%20a%20new%20feature%20for%20defining%20reusable%20prompts%20to%20streamline%20interactions%20and%20improve%20workflow%20efficiency.%0A%0Ahttps://cloud.google.com/blog/topics/developers-practitioners/gemini-cli-custom-slash-commands
+  84. https://www.x.com/googlecloud
+  85. https://www.youtube.com/googlecloud
+  86. https://www.linkedin.com/showcase/google-cloud
+  87. https://www.instagram.com/googlecloud/
+  88. https://www.facebook.com/googlecloud/
+  89. https://cloud.google.com/
